@@ -6,6 +6,9 @@ import os, shutil
 
 
 def choose_template(age):
+
+    # TODO: fix this so that it works on any template, not just a preset one
+
     print("Choosing template...")
     print "age is: ", age
     
@@ -43,7 +46,7 @@ def choose_onsets(l, n=5, t=5, start=30, end=10):
     return [(x, x + t) for x in selected]
 
 
-def create_eaf(etf_path, id, output_dir, timestamps_list, context_before = 120000.0, context_after = 60000.0):
+def create_eaf(etf_path, id, output_dir, timestamps_list, context_before = 120, context_after = 60):
     eaf = pympi.Eaf(etf_path)
     ling_type = "transcription"
     eaf.add_tier("code", ling=ling_type)
@@ -51,12 +54,14 @@ def create_eaf(etf_path, id, output_dir, timestamps_list, context_before = 12000
     eaf.add_tier("code_num", ling=ling_type)
     eaf.add_tier("on_off", ling=ling_type)
     for i, ts in enumerate(timestamps_list):
-        print("Creating eaf # ", i+1)
+        print "Creating eaf # ", i+1
         whole_region_onset = ts[0]
         whole_region_offset = ts[1]
+        #print whole_region_offset, whole_region_onset
         # TODO: add sanity checks for timestamps -> make it so you can't go before a file start time, nor go after a file endtime
         roi_onset = float(whole_region_onset) - context_before
         roi_offset = float(whole_region_offset) + context_after
+        print roi_onset, roi_offset
         eaf.add_annotation("code", roi_onset, roi_offset)
         eaf.add_annotation("code_num", roi_onset, roi_offset, value=str(i+1))
         eaf.add_annotation("on_off", roi_onset, roi_offset, value="{}_{}".format(roi_onset, roi_offset))

@@ -1,3 +1,6 @@
+# Edited by Sarah MacEwan
+# Aug 2, 2019
+
 import sys, os, shutil
 #import pandas as pd
 import constants, utils
@@ -35,7 +38,7 @@ def readCSV():
                 age = row[2]
                 clipAges.append(age)
                 #print "clip times: ", clipTimes
-                print clipAges
+                #print clipAges
             clipCount +=1
             if clipCount >= 14:
                 clipCount = 0
