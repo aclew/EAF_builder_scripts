@@ -1,4 +1,4 @@
-import pandas as pd
+#import pandas as pd
 import constants
 import pympi
 import random
@@ -6,12 +6,16 @@ import os, shutil
 
 
 def choose_template(age):
-    if 0 <= age <= 7:
-            return constants.basic_00_07, constants.basic_00_07_pfsx
-    elif 8 <= age <= 18:
-            return constants.basic_08_18, constants.basic_08_18_pfsx
-    elif 19 <= age <= 36:
-            return constants.basic_19_36, constants.basic_19_36_pfsx
+    print("Choosing template...")
+    print "age is: ", age
+    
+    return 'etf_templates/ACLEW-basic-template_08-18mo.etf', 'etf_templates/ACLEW-basic-template_08-18mo.pfsx'
+    #if 0 <= age <= 7:
+     #       return constants.basic_00_07, constants.basic_00_07_pfsx
+    #elif 8 <= age <= 18:
+     #       return constants.basic_08_18, constants.basic_08_18_pfsx
+    #elif 19 <= age <= 36:
+     #       return constants.basic_19_36, constants.basic_19_36_pfsx
 
 def overlap(x, y, t):
     if y < x < y+t:
@@ -27,6 +31,7 @@ def choose_onsets(l, n=5, t=5, start=30, end=10):
     int t: length of region of interest (including context)
     int start: minute at which
     """
+    print("choosing onsets")
     minute_range = range(start, min(l - t, l-end))
     random.shuffle(minute_range)
     selected = []
@@ -38,7 +43,7 @@ def choose_onsets(l, n=5, t=5, start=30, end=10):
     return [(x, x + t) for x in selected]
 
 
-def create_eaf(etf_path, id, output_dir, timestamps_list, context_before = 120000, context_after = 60000):
+def create_eaf(etf_path, id, output_dir, timestamps_list, context_before = 120000.0, context_after = 60000.0):
     eaf = pympi.Eaf(etf_path)
     ling_type = "transcription"
     eaf.add_tier("code", ling=ling_type)
@@ -46,10 +51,12 @@ def create_eaf(etf_path, id, output_dir, timestamps_list, context_before = 12000
     eaf.add_tier("code_num", ling=ling_type)
     eaf.add_tier("on_off", ling=ling_type)
     for i, ts in enumerate(timestamps_list):
+        print("Creating eaf # ", i+1)
         whole_region_onset = ts[0]
         whole_region_offset = ts[1]
-        roi_onset = whole_region_onset + context_before
-        roi_offset = whole_region_offset - context_after
+        # TODO: add sanity checks for timestamps -> make it so you can't go before a file start time, nor go after a file endtime
+        roi_onset = float(whole_region_onset) - context_before
+        roi_offset = float(whole_region_offset) + context_after
         eaf.add_annotation("code", roi_onset, roi_offset)
         eaf.add_annotation("code_num", roi_onset, roi_offset, value=str(i+1))
         eaf.add_annotation("on_off", roi_onset, roi_offset, value="{}_{}".format(roi_onset, roi_offset))
@@ -58,6 +65,7 @@ def create_eaf(etf_path, id, output_dir, timestamps_list, context_before = 12000
     return eaf
 
 def create_output_csv(id, timestamps_list, context_before = 120000, context_after = 60000):
+    print("Making output csv...")
     selected = pd.DataFrame(columns = ['id', 'clip_num', 'onset', 'offset'], dtype=int)
     for i, ts in enumerate(timestamps_list):
         selected = selected.append({'id': id,

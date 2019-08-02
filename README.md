@@ -7,7 +7,7 @@
 Usage
 
 ```
-python create_eaf_random_regions.py path/to/info_spreadsheet.csv path/to/output_dir
+python create_eafs_HV.py path/to/info_spreadsheet.csv path/to/output_dir
 ```
 
 where:
