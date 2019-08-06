@@ -32,28 +32,34 @@ def readCSV():
                 #print record_list
                 clipName = row[1].split('_')
                 #print "clip name is: ", clipName
-                tStart = clipName[3]
-                tEnd = clipName[4]
+                tStart = float(clipName[3])*1000.0
+                tEnd = float(clipName[4])*1000.0
                 clipTimes.append([tStart, tEnd])
                 age = row[2]
                 clipAges.append(age)
                 #print "clip times: ", clipTimes
                 #print clipAges
-            clipCount +=1
-            if clipCount >= 14:
-                clipCount = 0
+            #clipCount +=1
+            #if clipCount >= 14:
+            #   clipCount = 0
             rNum = rNum+1
     startRange = 0
     for recording in record_list:
-        babyAge = clipAges[startRange]
+        # TODO: add in checks for exceptions (which operate on their own # of clips, rather than on 15 clips/recording)
+        babyAge = int(clipAges[startRange])
         print "baby age is: ", babyAge
         etf_path, pfsx_path = utils.choose_template(babyAge)
         timestamps = clipTimes[startRange:startRange+15]
         print "timestamps: ", timestamps
         utils.create_eaf(etf_path, recording, output_dir, timestamps)
+        shutil.copy(pfsx_path, os.path.join(output_dir, "{}.pfsx".format(recording)))
         startRange = startRange + 15
 
 def main():
+
+    '''
+    Depreciated code
+    '''
 
     print("iterating through input csv...")
 
