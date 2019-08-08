@@ -32,8 +32,8 @@ def readCSV():
                 #print record_list
                 clipName = row[1].split('_')
                 #print "clip name is: ", clipName
-                tStart = float(clipName[3])*1000.0
-                tEnd = float(clipName[4])*1000.0
+                tStart = int(float(clipName[3])*1000)
+                tEnd = int(float(clipName[4])*1000)
                 clipTimes.append([tStart, tEnd])
                 age = row[2]
                 clipAges.append(age)

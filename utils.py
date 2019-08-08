@@ -4,6 +4,11 @@ import pympi
 import random
 import os, shutil
 
+import sys
+import glob
+import xml.etree.ElementTree
+from collections import defaultdict
+
 
 def choose_template(age):
 
@@ -48,7 +53,8 @@ def choose_onsets(l, n=5, t=5, start=30, end=10):
 
 
 def create_eaf(etf_path, id, output_dir, timestamps_list, context_before = 120000, context_after = 60000):
-    eaf = pympi.Eaf(etf_path)
+    eafob = pympi.Elan.Eaf(etf_path)
+    eaf = pympi.Elan.Eaf(etf_path)
     ling_type = "transcription"
     eaf.add_tier("code", ling=ling_type)
     eaf.add_tier("context", ling=ling_type)
@@ -59,9 +65,8 @@ def create_eaf(etf_path, id, output_dir, timestamps_list, context_before = 12000
         whole_region_onset = ts[0]
         whole_region_offset = ts[1]
         #print whole_region_offset, whole_region_onset
-        # TODO: add sanity checks for timestamps -> make it so you can't go before a file start time, nor go after a file endtime
-        roi_onset = float(whole_region_onset) - context_before
-        roi_offset = float(whole_region_offset) + context_after
+        roi_onset = whole_region_onset - context_before
+        roi_offset = whole_region_offset + context_after
         if roi_onset < 0:
             roi_onset = 0.0
         print roi_onset, roi_offset
@@ -69,6 +74,33 @@ def create_eaf(etf_path, id, output_dir, timestamps_list, context_before = 12000
         eaf.add_annotation("code_num", roi_onset, roi_offset, value=str(i+1))
         eaf.add_annotation("on_off", roi_onset, roi_offset, value="{}_{}".format(roi_onset, roi_offset))
         eaf.add_annotation("context", whole_region_onset, whole_region_offset)
+        
+    #Create Header and other xml info :)
+    #e = xml.etree.ElementTree.parse(etf_path).getroot()
+
+    #cvs = eafob.get_controlled_vocabulary_names()
+    #for atype in e.findall('CONTROLLED_VOCABULARY'):
+     #   CV_ID= ""
+      #  EXT_REF= ""
+       # for name, value in atype.attrib.items():
+        #    if name=="CV_ID":
+         #       CV_ID = value
+          #  if name=="EXT_REF":
+           #     EXT_REF = value
+        #eaf.add_controlled_vocabulary(CV_ID,ext_ref=EXT_REF)
+
+    #ext_refs = eafob.get_external_ref_names()
+    #for key in ext_refs:
+     #   tmp = (eafob.get_external_ref(key))
+      #  eaf.add_external_ref(key,tmp[0],tmp[1])
+
+
+
+    #what about context
+    #for key,val in eaf.get_properties():
+     #   eaf.add_property(key,val)
+    #pympi.Elan.to_eaf(os.path.join(sys.argv[2],os.path.basename(etf_path)),eaf)
+        
     eaf.to_file(os.path.join(output_dir, "{}.eaf".format(id)))
     return eaf
 
