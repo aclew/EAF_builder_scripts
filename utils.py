@@ -17,12 +17,9 @@ def choose_template(age):
     if 0 <= age <= 7:
         print "age range: 0-7"
         return 'etf_templates/ACLEW-basic-template_00-07mo.etf', 'etf_templates/ACLEW-basic-template_00-07mo.pfsx'
-    elif 8 <= age <= 18:
-        print "age range: 8-18"
+    elif 8 <= age:
+        print "age range: 8+"
         return 'etf_templates/ACLEW-basic-template_08-18mo.etf', 'etf_templates/ACLEW-basic-template_08-18mo.pfsx'
-    elif 19 <= age <= 36:
-        print "age range: 19-36"
-        return 'etf_templates/ACLEW-basic-template_19-36mo.etf', 'etf_templates/ACLEW-basic-template_19-36mo.pfsx'
 
 def overlap(x, y, t):
     if y < x < y+t:
@@ -53,6 +50,7 @@ def choose_onsets(l, n=5, t=5, start=30, end=10):
 
 
 def create_eaf(etf_path, id, output_dir, timestamps_list, context_before = 120000, context_after = 60000):
+    print "ACLEW ID: ", id
     eafob = pympi.Elan.Eaf(etf_path)
     eaf = pympi.Elan.Eaf(etf_path)
     ling_type = "transcription"
@@ -65,13 +63,16 @@ def create_eaf(etf_path, id, output_dir, timestamps_list, context_before = 12000
         whole_region_onset = ts[0]
         whole_region_offset = ts[1]
         #print whole_region_offset, whole_region_onset
-        roi_onset = whole_region_onset - context_before
-        roi_offset = whole_region_offset + context_after
+        roi_onset = whole_region_onset + context_before
+        roi_offset = whole_region_offset - context_after
         if roi_onset < 0:
             roi_onset = 0.0
-        print roi_onset, roi_offset
+        print "context range: ", whole_region_onset, whole_region_offset
+        print "code range: ", roi_onset, roi_offset
+        print "on_off: ", "{}_{}".format(roi_onset, roi_offset)
+        codeNumVal = "HV-" + str(i+1)
         eaf.add_annotation("code", roi_onset, roi_offset)
-        eaf.add_annotation("code_num", roi_onset, roi_offset, value=str(i+1))
+        eaf.add_annotation("code_num", roi_onset, roi_offset, value=codeNumVal)
         eaf.add_annotation("on_off", roi_onset, roi_offset, value="{}_{}".format(roi_onset, roi_offset))
         eaf.add_annotation("context", whole_region_onset, whole_region_offset)
         
