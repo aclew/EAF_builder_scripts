@@ -14,11 +14,14 @@ def readCSV():
 
     output_dir = sys.argv[2]
     
-    record_list = set([])
+    record_list = []
     clipCount = 0
     rNum = 0
     clipTimes = []
     clipAges = []
+   # exceptionList = set([])
+    #exceptionTimes[]
+    #exceptionAges[]
     with open(sys.argv[1]) as csvFile:
         reader = csv.reader(csvFile)
         for row in reader:
@@ -27,16 +30,31 @@ def readCSV():
                 rNum = rNum+1
                 continue
             else:
-                record_list.add(row[0])
+                #if row[-2] == "standard":
+                 #   print row[-2]
+                record = row[0]
+                if not record in record_list:
+                    record_list.append(record)
+                    print "added ", record, "to record list!"
                 #print row
-                #print record_list
+                print record_list
                 clipName = row[1].split('_')
                 #print "clip name is: ", clipName
                 tStart = int(float(clipName[3])*1000)
                 tEnd = int(float(clipName[4])*1000)
-                clipTimes.append([tStart, tEnd])
+                clipTimes.append([row[0], tStart, tEnd])
                 age = row[2]
                 clipAges.append(age)
+ #               else:
+  #                  print row[-2]
+   #                 exceptionlist.add(row[0])
+    #                clipName = row[1].split('_')
+     #               print "clip name is: ", clipName
+      #              tStart = int(float(clipName[3])*1000)
+       #             tEnd = int(float(clipName[4])*1000)
+        #            exceptionTimes.append([tStart, tEnd])
+         #           age = row[2]
+          #          exceptionAges.append(age)
                 #print "clip times: ", clipTimes
                 #print clipAges
             #clipCount +=1
@@ -44,16 +62,49 @@ def readCSV():
             #   clipCount = 0
             rNum = rNum+1
     startRange = 0
-    for recording in record_list:
-        # TODO: add in checks for exceptions (which operate on their own # of clips, rather than on 15 clips/recording)
+    listLen = len(clipTimes)
+    print "clip Times: "
+    print clipTimes
+    for recNum in range(len(record_list)):
+        print "starting new recording"
+        recording = record_list[recNum]
         babyAge = int(clipAges[startRange])
         print "baby age is: ", babyAge
         etf_path, pfsx_path = utils.choose_template(babyAge)
-        timestamps = clipTimes[startRange:startRange+15]
+        timestamps = []
+        itercount = startRange
+        num_clips = 0
+        timeData = clipTimes[startRange]
+        print "initial time data = ", timeData
+        rec = timeData[0]
+        print "start range: ", startRange
+        print "rec = ", rec, "recording = ", recording
+        while rec == recording and itercount < listLen-1:
+            print "start range: ", startRange, "itercount: ", itercount
+            # TODO: add in checks for exceptions (which operate on their own # of clips, rather than on 15 clips/recording)
+            timestamps.append(clipTimes[itercount])
+            itercount += 1
+            timeData = clipTimes[itercount]
+            rec = timeData[0]
+            print "time data = ", timeData, " and rec is: ", rec
+            num_clips += 1
+            print "num clips = ", num_clips
         print "timestamps: ", timestamps
-        utils.create_eaf(etf_path, recording, output_dir, timestamps)
-        shutil.copy(pfsx_path, os.path.join(output_dir, "{}.pfsx".format(recording)))
-        startRange = startRange + 15
+        if len(timestamps) >1:
+            utils.create_eaf(etf_path, recording, output_dir, timestamps)
+            shutil.copy(pfsx_path, os.path.join(output_dir, "{}.pfsx".format(recording)))
+        else:
+            print "error, timestamps were empty D:"
+        startRange = startRange + num_clips
+    #for reco in exceptionList:
+     #   babyAge = int(clipAges[startRange])
+      #  print "baby age is: ", babyAge
+       # etf_path, pfsx_path = utils.choose_template(babyAge)
+        #timestamps = clipTimes[startRange:startRange+15]
+        #print "timestamps: ", timestamps
+   #     utils.create_eaf(etf_path, recording, output_dir, timestamps)
+   #     shutil.copy(pfsx_path, os.path.join(output_dir, "{}.pfsx".format(recording)))
+   #     startRange = startRange + 15
 
 def main():
 

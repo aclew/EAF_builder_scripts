@@ -60,8 +60,9 @@ def create_eaf(etf_path, id, output_dir, timestamps_list, context_before = 12000
     eaf.add_tier("on_off", ling=ling_type)
     for i, ts in enumerate(timestamps_list):
         print "Creating eaf code segment # ", i+1
-        whole_region_onset = ts[0]
-        whole_region_offset = ts[1]
+        print "enumerate makes: ", i, ts
+        whole_region_onset = ts[1]
+        whole_region_offset = ts[2]
         #print whole_region_offset, whole_region_onset
         roi_onset = whole_region_onset + context_before
         roi_offset = whole_region_offset - context_after
@@ -71,10 +72,13 @@ def create_eaf(etf_path, id, output_dir, timestamps_list, context_before = 12000
         print "code range: ", roi_onset, roi_offset
         print "on_off: ", "{}_{}".format(roi_onset, roi_offset)
         codeNumVal = "HV-" + str(i+1)
+        print "code_num", codeNumVal
         eaf.add_annotation("code", roi_onset, roi_offset)
         eaf.add_annotation("code_num", roi_onset, roi_offset, value=codeNumVal)
         eaf.add_annotation("on_off", roi_onset, roi_offset, value="{}_{}".format(roi_onset, roi_offset))
         eaf.add_annotation("context", whole_region_onset, whole_region_offset)
+    eaf.to_file(os.path.join(output_dir, "{}.eaf".format(id)))
+    return eaf
         
     #Create Header and other xml info :)
     #e = xml.etree.ElementTree.parse(etf_path).getroot()
@@ -102,8 +106,7 @@ def create_eaf(etf_path, id, output_dir, timestamps_list, context_before = 12000
      #   eaf.add_property(key,val)
     #pympi.Elan.to_eaf(os.path.join(sys.argv[2],os.path.basename(etf_path)),eaf)
         
-    eaf.to_file(os.path.join(output_dir, "{}.eaf".format(id)))
-    return eaf
+
 
 def create_output_csv(id, timestamps_list, context_before = 120000, context_after = 60000):
     '''

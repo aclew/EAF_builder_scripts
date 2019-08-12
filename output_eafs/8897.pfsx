@@ -4,6 +4,8 @@
     <prefList key="MultiTierViewer.TierOrder">
         <String>CHI</String>
         <String>vcm@CHI</String>
+        <String>lex@CHI</String>
+        <String>mwu@CHI</String>
         <String>FA1</String>
         <String>xds@FA1</String>
     </prefList>
@@ -112,5 +114,4 @@
     <pref key="LayoutManager.CurrentMode">
         <Int>1</Int>
     </pref>
-    <prefList key="MultiTierViewer.HiddenTiers"/>
 </preferences>
