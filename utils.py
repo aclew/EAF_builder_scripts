@@ -45,3 +45,50 @@ def choose_onsets_periodic(l,skip, t=2, start=10, end=10):
     
     return periodic_minute_range
 
+def create_eaf(etf_path, id, output_dir, timestamps_list, context_before = 1200, context_after = 6000):
+    
+    print("ACLEW ID: ", id)
+    eafob = pympi.Elan.Eaf(etf_path)
+    eaf = pympi.Elan.Eaf(etf_path)
+    ling_type = "transcription"
+    eaf.add_tier("code", ling=ling_type)
+    eaf.add_tier("context", ling=ling_type)
+    eaf.add_tier("code_num", ling=ling_type)
+    eaf.add_tier("on_off", ling=ling_type)
+    for i, ts in enumerate(timestamps_list):
+        print(timestamps_list)
+        print("Creating eaf code segment # ", i+1)
+        print("enumerate makes: ", i, ts)
+        whole_region_onset = ts[0]
+        whole_region_offset = ts[1]
+        #print whole_region_offset, whole_region_onset
+        roi_onset = whole_region_onset + context_before
+        roi_offset = whole_region_offset - context_after
+        if roi_onset < 0:
+            roi_onset = 0.0
+        print("context range: ", whole_region_onset, whole_region_offset)
+        print("code range: ", roi_onset, roi_offset)
+        print("on_off: ", "{}_{}".format(roi_onset, roi_offset))
+        codeNumVal = "HV-" + str(i+1)
+        print("code_num", codeNumVal)
+        eaf.add_annotation("code", roi_onset, roi_offset)
+        eaf.add_annotation("code_num", roi_onset, roi_offset, value=codeNumVal)
+        eaf.add_annotation("on_off", roi_onset, roi_offset, value="{}_{}".format(roi_onset, roi_offset))
+        eaf.add_annotation("context", whole_region_onset, whole_region_offset)
+    eaf.to_file(os.path.join(output_dir, "{}.eaf".format(id)))
+    return eaf
+
+def create_output_csv(id, timestamps_list, context_before = 1200, context_after = 60000):
+    '''Creates a csv output of created templates
+    '''
+    print("Making output csv...")
+    selected = pd.DataFrame(columns = ['id', 'clip_num', 'onset', 'offset'], dtype=int)
+    for i, ts in enumerate(timestamps_list):
+        selected = selected.append({'id': id,
+                                    'clip_num': i+1,
+                                    'onset': ts[0]+context_before,
+                                    'offset': ts[1]-context_after},
+                                    ignore_index=True)
+    # selected[['id', 'clip_num', 'onset', 'offset']] = selected[['id', 'clip_num', 'onset', 'offset']].astype(int)
+    return selected
+

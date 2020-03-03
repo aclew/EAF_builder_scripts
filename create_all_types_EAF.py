@@ -9,12 +9,8 @@ import pympi
 from utils.py import *
 
 """
-
+Creates a generic eaf, proper both to random and periodic method
 """
-#check if DiViMe repository pulled
-import importlib
-divime_loader = importlib.find_loader('DiViMe')
-found = divime_loader is not None
 
 
 def create_all_type_eaf(folder,output_dir,onset_function,skip):
@@ -23,7 +19,9 @@ def create_all_type_eaf(folder,output_dir,onset_function,skip):
     Args: 
         folder:a folder which contains wav files to proccess
         onset_function: chosen onset_function for random, periodic or HV eaf files
-    Returns: a folder which contains eafs for each wav file of input filder
+        skip: duration gap for periodic method, should mark '0' for random method
+    Returns: 
+        output_dir:a folder which contains eafs for each wav file of input filder
     """
 
 
