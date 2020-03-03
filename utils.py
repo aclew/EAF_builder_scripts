@@ -75,10 +75,10 @@ def create_eaf(etf_path, id, output_dir, timestamps_list, context_before = 1200,
         eaf.add_annotation("code_num", roi_onset, roi_offset, value=codeNumVal)
         eaf.add_annotation("on_off", roi_onset, roi_offset, value="{}_{}".format(roi_onset, roi_offset))
         eaf.add_annotation("context", whole_region_onset, whole_region_offset)
-    eaf.to_file(os.path.join(os.path.dirname(output_dir), "{}.eaf".format(id)))
+    eaf.to_file(os.path.join(output_dir, "{}.eaf".format(id)))
     return eaf
 
-def create_output_csv(id, timestamps_list, path, name, context_before = 1200, context_after = 60000):
+def create_output_csv(id, timestamps_list, file_name, context_before = 1200, context_after = 60000):
     '''Creates a csv output of created templates
     '''
     print("Making output csv...")
@@ -90,5 +90,5 @@ def create_output_csv(id, timestamps_list, path, name, context_before = 1200, co
                                     'offset': ts[1]-context_after},
                                     ignore_index=True)
     selected[['id', 'clip_num', 'onset', 'offset']] = selected[['id', 'clip_num', 'onset', 'offset']].astype(int)
-    selected.to_csv(name,index=False)
+    selected.to_csv(file_name,index=False)
 

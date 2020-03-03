@@ -11,3 +11,5 @@ For launching the code:
 	python3 create_all_type_eaf.py 'path_to_your_wav_folder' 'path_to_new_eaf_store_file' 'periodic or random(choose one)' skip_number
 
 * skip_number is 0 for random method and up to yout choice for periodic method.
+
+* for random method segment number is n=15 as default. You can change it by utils.py -->choose_onsets_random(...,n='number you want',...)

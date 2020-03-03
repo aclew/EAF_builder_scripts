@@ -26,7 +26,7 @@ def create_all_type_eaf(folder,output_dir,onset_function,skip,eaf_type):
     """
 
 
-    os.makedirs(os.path.dirname(output_dir), exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
     record_list = []
  
     for dirpath, dirnames, wavfiles in os.walk(folder): #getting into folder for proccessing files
@@ -47,8 +47,8 @@ def create_all_type_eaf(folder,output_dir,onset_function,skip,eaf_type):
         # create
         print("making the eaf file")
         create_eaf(etf_path,record[0]+eaf_type, output_dir, timestamps)
-        shutil.copy(pfsx_path, os.path.join(os.path.dirname(output_dir), "{}.pfsx".format(record[0]+eaf_type)))
-        #selected=create_output_csv(record[0], timestamps,os.path.join(os.path.dirname(output_dir),eaf_type))
+        shutil.copy(pfsx_path, os.path.join(output_dir, "{}.pfsx".format(record[0]+'_'+eaf_type)))
+        selected=create_output_csv(record[0], timestamps, os.path.join(output_dir,"{}.csv".format(record[0]+'_'+eaf_type)))
 
 # AFFICHAGE ET TESTS
 
