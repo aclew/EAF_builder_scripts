@@ -78,7 +78,7 @@ def create_eaf(etf_path, id, output_dir, timestamps_list, context_before = 1200,
     eaf.to_file(os.path.join(os.path.dirname(output_dir), "{}.eaf".format(id)))
     return eaf
 
-def create_output_csv(id, timestamps_list, context_before = 1200, context_after = 60000):
+def create_output_csv(id, timestamps_list, path, name, context_before = 1200, context_after = 60000):
     '''Creates a csv output of created templates
     '''
     print("Making output csv...")
@@ -89,6 +89,6 @@ def create_output_csv(id, timestamps_list, context_before = 1200, context_after 
                                     'onset': ts[0]+context_before,
                                     'offset': ts[1]-context_after},
                                     ignore_index=True)
-    # selected[['id', 'clip_num', 'onset', 'offset']] = selected[['id', 'clip_num', 'onset', 'offset']].astype(int)
-    return selected
+    selected[['id', 'clip_num', 'onset', 'offset']] = selected[['id', 'clip_num', 'onset', 'offset']].astype(int)
+    selected.to_csv(name,index=False)
 

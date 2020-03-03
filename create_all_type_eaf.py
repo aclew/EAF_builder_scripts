@@ -14,7 +14,7 @@ Creates a generic eaf, proper both to random and periodic method
 """
 
 
-def create_all_type_eaf(folder,output_dir,onset_function,skip):
+def create_all_type_eaf(folder,output_dir,onset_function,skip,eaf_type):
     """
     Create eaf files from wav files, in random onset choice
     Args: 
@@ -46,11 +46,9 @@ def create_all_type_eaf(folder,output_dir,onset_function,skip):
 
         # create
         print("making the eaf file")
-        create_eaf(etf_path,record[0]+str(onset_function).split('_')[-1], output_dir, timestamps)
-        shutil.copy(pfsx_path, os.path.join(os.path.dirname(output_dir), "{}.pfsx".format(record[0]+str(onset_function).split('_')[-1])))
-        selected=create_output_csv(record[0], timestamps)
-    #selected[['clip_num', 'onset', 'offset']] = selected[['clip_num', 'onset', 'offset']].astype(int)
-    #selected.to_csv(os.path.join(output_dir,'selected_regions.csv'), index=False)
+        create_eaf(etf_path,record[0]+eaf_type, output_dir, timestamps)
+        shutil.copy(pfsx_path, os.path.join(os.path.dirname(output_dir), "{}.pfsx".format(record[0]+eaf_type)))
+        #selected=create_output_csv(record[0], timestamps,os.path.join(os.path.dirname(output_dir),eaf_type))
 
 # AFFICHAGE ET TESTS
 
@@ -65,9 +63,9 @@ def main():
 
     #Treating different EAF options an exceptions
     if args.eaf_type.lower()=='periodic':
-        create_all_type_eaf(args.wav_folder,args.output_folder,choose_onsets_periodic,int(args.s))
+        create_all_type_eaf(args.wav_folder,args.output_folder,choose_onsets_periodic,int(args.s),args.eaf_type)
     if args.eaf_type.lower()=='random':
-        create_all_type_eaf(args.wav_folder,args.output_folder,choose_onsets_random,int(args.s))
+        create_all_type_eaf(args.wav_folder,args.output_folder,choose_onsets_random,int(args.s),args.eaf_type)
     elif args.eaf_type.lower()!='random' and args.eaf_type.lower()!='periodic':
         print("Sorry this type of eaf does not exist please type 'random' or 'periodic'.")
 
