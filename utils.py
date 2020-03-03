@@ -13,7 +13,7 @@ def choose_template():
     """
     return 'etf_templates/ACLEW-basic-template_all-tiers.etf', 'etf_templates/ACLEW-basic-template_all-tiers.pfsx'
 
-def choose_onsets_random(l,n=15, t=2, start=10, end=10):
+def choose_onsets_random(l,skip,n=15, t=2, start=10, end=10):
     """
     Function whic sets onset times in a random way
     
@@ -33,7 +33,7 @@ def choose_onsets_random(l,n=15, t=2, start=10, end=10):
                 break
         else:
             minute_tuple_raw_list.append((start, stop))
-            
+    print(minute_tuple_raw_list)
     return minute_tuple_raw_list
 
 def choose_onsets_periodic(l,skip, t=2, start=10, end=10):
@@ -75,7 +75,7 @@ def create_eaf(etf_path, id, output_dir, timestamps_list, context_before = 1200,
         eaf.add_annotation("code_num", roi_onset, roi_offset, value=codeNumVal)
         eaf.add_annotation("on_off", roi_onset, roi_offset, value="{}_{}".format(roi_onset, roi_offset))
         eaf.add_annotation("context", whole_region_onset, whole_region_offset)
-    eaf.to_file(os.path.join(output_dir, "{}.eaf".format(id)))
+    eaf.to_file(os.path.join(os.path.dirname(output_dir), "{}.eaf".format(id)))
     return eaf
 
 def create_output_csv(id, timestamps_list, context_before = 1200, context_after = 60000):
