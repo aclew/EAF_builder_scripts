@@ -13,14 +13,17 @@ def choose_template():
     """
     return 'etf_templates/ACLEW-basic-template_all-tiers.etf', 'etf_templates/ACLEW-basic-template_all-tiers.pfsx'
 
-def choose_onsets_random(l,skip,n=15, t=2, start=10, end=10):
+def choose_onsets_random(l,n=15, t=2, start=10, end=10):
     """
-    Function whic sets onset times in a random way
-    
-    int l: length of recording in minutes
-    int n: number of random segments to choose
-    int t: length of region of interest (including context)
-    int start: minute at which
+    Function whic sets onset-offset couples in a random way
+    Args:
+    	int l: length of recording in minutes
+    	int n: number of random segments to choose
+    	int t: length of the chosen segments for annotation
+    	int start: the delay value from the beginnig of the sound file
+    	int end: the delay value before the ending of the sound file
+    Returns:
+    	A list of tuples which contains onset-offset couples in random intervals
     """
     print("choosing random onsets")
     minute_tuple_raw_list=[] #tuple of integers (begin_min,end_min) before skip condition applied
@@ -36,9 +39,16 @@ def choose_onsets_random(l,skip,n=15, t=2, start=10, end=10):
     print(minute_tuple_raw_list)
     return minute_tuple_raw_list
 
-def choose_onsets_periodic(l,skip, t=2, start=10, end=10):
-    """Function which sets onsets time in a periodic skip version 
-    skip: int """
+def choose_onsets_periodic(l,skip=60, t=2, start=10, end=10):
+    """Function which sets onset-offset couples with a periodic interstimulus interval (skip)
+    Args:
+    	int l: length of recording in minutes
+    	int skip: interstimulus interval, 60 as default
+    	int t: length of the chosen segments for annotation
+    	int end: the delay value before the ending of the sound file
+    Returns:
+    	A list of tuples which contains onset-offset couples in periodic intervals
+    """
     print("choosing periodic onsets")
     minute_range = [x for x in np.arange(start,min(l - t, l-end),skip+t)] #creates skipped list of numbers
     periodic_minute_range=[(i,i+t) for i in minute_range]#creates t min apart tuple couples
