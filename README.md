@@ -2,6 +2,9 @@ EAF_BUILDER_SCRIPTS -2nd version
 
 This repo contains the script for creating periodicly or randomly selected ELAN templates.
 
+For cloning te repo to your computer type to the terminal:
+	git clone https://github.com/aclew/EAF_builder_scripts/tree/Second-Version
+
 -Utils file contains onset fix tools for random and periodic onset-offset method, as well as an eaf creator function and csv creation function.
 
 -Create_all_type_eaf contains a generic eaf generator code for periodic and random methods.
