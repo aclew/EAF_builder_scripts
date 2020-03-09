@@ -10,6 +10,7 @@ def choose_method(method):
 	#Allow user to choose method --> periodic or random
 	global variable
 	variable=method
+	
 def set_skip(nbr):
 	pass
 
@@ -30,8 +31,7 @@ def save_to():
 
 fen = Tk()
 fen.title('EAF creator')
-lab = Label(fen,text='Welcome, please choose a wav folder to be transformed to Eaf. Then choose method; periodic or random.',height=10)
-
+lab = Label(fen,text='Welcome, please choose a wav folder to be transformed to Eaf and another folder to save created templates. Then choose method; periodic or random.',height=10)
 lab.pack()
 
 menubar=Menu(fen)
@@ -42,9 +42,6 @@ filemenu.add_command(label="Ouvrir",command=ouvrir)
 filemenu.add_command(label="Save to",command=save_to)
 
 
-lab = Label(fen,text='Welcome, please choose a wav folder to be transformed to Eaf. Then choose method; periodic or random.',height=10)
-
-lab.pack()
 
 
 Button(fen, text='Quit', command=fen.quit).pack(side=RIGHT)
