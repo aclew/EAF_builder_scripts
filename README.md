@@ -8,7 +8,7 @@ This repo contains the script for creating periodicly or randomly selected ELAN 
 
 For launching the code:
 
-	python3 create_all_type_eaf.py 'path_to_your_wav_folder' 'path_to_new_eaf_store_file' 'periodic or random(choose one)'
+	python3 main1.py 'path_to_your_wav_folder' 'path_to_new_eaf_store_file' 'periodic or random(choose one)'
 
 * skip_number is 60min periodic method as default. You can change it by utils.py -->choose_onsets_periodic(...,skip='number you want',...)
 
