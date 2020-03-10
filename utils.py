@@ -13,7 +13,7 @@ def choose_template():
     """
     return 'etf_templates/ACLEW-basic-template_all-tiers.etf', 'etf_templates/ACLEW-basic-template_all-tiers.pfsx'
 
-def choose_onsets_random(l,n, t, start=10, end=10):
+def choose_onsets_random(l,n, t, start=10, end=0):
     """
     Function whic sets onset-offset couples in a random way
     Args:
@@ -41,7 +41,7 @@ def choose_onsets_random(l,n, t, start=10, end=10):
     print(minute_tuple_raw_list)
     return minute_tuple_raw_list
 
-def choose_onsets_periodic(l,skip, t, start=10, end=10):
+def choose_onsets_periodic(l,skip, t, start=34, end=0):
     """Function which sets onset-offset couples with a periodic interstimulus interval (skip)
     Args:
     	int l: length of recording in minutes
@@ -74,19 +74,19 @@ def create_eaf(etf_path, id, output_dir, timestamps_list, eaf_type,context_befor
         whole_region_onset = ts[0]
         whole_region_offset = ts[1]
         #print whole_region_offset, whole_region_onset
-        roi_onset = whole_region_onset + context_before
-        roi_offset = whole_region_offset - context_after
-        if roi_onset < 0:
-            roi_onset = 0.0
-        print("context range: ", whole_region_onset, whole_region_offset)
-        print("code range: ", roi_onset, roi_offset)
-        print("on_off: ", "{}_{}".format(roi_onset, roi_offset))
+        context_onset = whole_region_onset - context_before
+        context_offset = whole_region_offset + context_after
+        if context_onset < 0:
+            context_onset = 0.0
+        print("context range: ", context_onset, context_offset)
+        print("code range: ", whole_region_onset, whole_region_offset)
+        print("on_off: ", "{}_{}".format(whole_region_onset, whole_region_offset))
         codeNumVal = eaf_type + str(i+1)
         print("code_num", codeNumVal)
-        eaf.add_annotation("code", roi_onset, roi_offset)
-        eaf.add_annotation("code_num", roi_onset, roi_offset, value=codeNumVal)
-        eaf.add_annotation("on_off", roi_onset, roi_offset, value="{}_{}".format(roi_onset, roi_offset))
-        eaf.add_annotation("context", whole_region_onset, whole_region_offset)
+        eaf.add_annotation("code", whole_region_onset, whole_region_offset)
+        eaf.add_annotation("code_num", whole_region_onset, whole_region_offset, value=codeNumVal)
+        eaf.add_annotation("on_off", whole_region_onset, whole_region_offset, value="{}_{}".format(whole_region_onset, whole_region_offset))
+        eaf.add_annotation("context", context_onset, context_offset)
     eaf.to_file(os.path.join(output_dir, "{}.eaf".format(id)))
     return eaf
 
