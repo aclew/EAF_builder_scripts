@@ -101,6 +101,6 @@ def create_output_csv(id, timestamps_list, file_name, context_before = 1200, con
                                     'onset': ts[0]+context_before,
                                     'offset': ts[1]-context_after},
                                     ignore_index=True)
-    selected[['id', 'clip_num', 'onset', 'offset']] = selected[['id', 'clip_num', 'onset', 'offset']].astype(int)
+    selected[['id', 'clip_num', 'onset', 'offset']] = selected[['id', 'clip_num', 'onset', 'offset']]
     selected.to_csv(file_name,index=False)
 
