@@ -14,13 +14,15 @@ Creates a generic eaf, proper both to random and periodic method
 """
 
 
-def create_all_type_eaf(folder,output_dir,onset_function,eaf_type,t,*args):
+def create_all_type_eaf(folder,output_dir,onset_function,eaf_type,t,contx_onset,contx_offset,*args):
     """
     Create eaf files from wav files, in random onset choice
     Args: 
         folder:a folder which contains wav files to proccess
         onset_function: chosen onset_function for random, periodic or HV eaf files
         eaf_type: random / periodic
+        contx_onset:Context onset and code onset difference
+        contx_offset: Context offset and code offset difference
         *args: for being able to call different arguments for periodic and random methods
     Returns: 
         output_dir:a folder which contains eafs for each wav file of input filder
@@ -47,6 +49,6 @@ def create_all_type_eaf(folder,output_dir,onset_function,eaf_type,t,*args):
 
         # create
         print("making the eaf file")
-        create_eaf(etf_path,record[0]+eaf_type, output_dir, timestamps,eaf_type)
+        create_eaf(etf_path,record[0]+eaf_type, output_dir, timestamps,eaf_type,contx_onset,contx_offset)
         shutil.copy(pfsx_path, os.path.join(output_dir, "{}.pfsx".format(record[0]+'_'+eaf_type)))
         selected=create_output_csv(record[0], timestamps, os.path.join(output_dir,"{}.csv".format(record[0]+'_'+eaf_type)))

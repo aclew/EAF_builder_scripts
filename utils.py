@@ -57,7 +57,7 @@ def choose_onsets_periodic(l,skip, t, start=34, end=0):
     
     return periodic_minute_range
 
-def create_eaf(etf_path, id, output_dir, timestamps_list, eaf_type,context_before = 1200, context_after = 6000):
+def create_eaf(etf_path, id, output_dir, timestamps_list, eaf_type,contxt_on, contxt_off):
     
     print("ACLEW ID: ", id)
     eafob = pympi.Elan.Eaf(etf_path)
@@ -74,8 +74,8 @@ def create_eaf(etf_path, id, output_dir, timestamps_list, eaf_type,context_befor
         whole_region_onset = ts[0]
         whole_region_offset = ts[1]
         #print whole_region_offset, whole_region_onset
-        context_onset = whole_region_onset - context_before
-        context_offset = whole_region_offset + context_after
+        context_onset = whole_region_onset - int(contxt_on)*60000 #representation in minutes
+        context_offset = whole_region_offset + int(contxt_off)*60000 #representation in minutes
         if context_onset < 0:
             context_onset = 0.0
         print("context range: ", context_onset, context_offset)
@@ -90,7 +90,7 @@ def create_eaf(etf_path, id, output_dir, timestamps_list, eaf_type,context_befor
     eaf.to_file(os.path.join(output_dir, "{}.eaf".format(id)))
     return eaf
 
-def create_output_csv(id, timestamps_list, file_name, context_before = 1200, context_after = 60000):
+def create_output_csv(id, timestamps_list, file_name, ):
     '''Creates a csv output of created templates
     '''
     print("Making output csv...")
