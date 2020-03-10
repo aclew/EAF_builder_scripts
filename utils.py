@@ -57,7 +57,7 @@ def choose_onsets_periodic(l,skip, t, start=10, end=10):
     
     return periodic_minute_range
 
-def create_eaf(etf_path, id, output_dir, timestamps_list, context_before = 1200, context_after = 6000):
+def create_eaf(etf_path, id, output_dir, timestamps_list, eaf_type,context_before = 1200, context_after = 6000):
     
     print("ACLEW ID: ", id)
     eafob = pympi.Elan.Eaf(etf_path)
@@ -81,7 +81,7 @@ def create_eaf(etf_path, id, output_dir, timestamps_list, context_before = 1200,
         print("context range: ", whole_region_onset, whole_region_offset)
         print("code range: ", roi_onset, roi_offset)
         print("on_off: ", "{}_{}".format(roi_onset, roi_offset))
-        codeNumVal = "HV-" + str(i+1)
+        codeNumVal = eaf_type + str(i+1)
         print("code_num", codeNumVal)
         eaf.add_annotation("code", roi_onset, roi_offset)
         eaf.add_annotation("code_num", roi_onset, roi_offset, value=codeNumVal)
@@ -98,8 +98,8 @@ def create_output_csv(id, timestamps_list, file_name, context_before = 1200, con
     for i, ts in enumerate(timestamps_list):
         selected = selected.append({'id': id,
                                     'clip_num': i+1,
-                                    'onset': ts[0]+context_before,
-                                    'offset': ts[1]-context_after},
+                                    'onset': ts[0]/60000,
+                                    'offset': ts[1]/60000},
                                     ignore_index=True)
     selected[['id', 'clip_num', 'onset', 'offset']] = selected[['id', 'clip_num', 'onset', 'offset']]
     selected.to_csv(file_name,index=False)
