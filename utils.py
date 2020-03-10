@@ -90,17 +90,19 @@ def create_eaf(etf_path, id, output_dir, timestamps_list, eaf_type,contxt_on, co
     eaf.to_file(os.path.join(output_dir, "{}.eaf".format(id)))
     return eaf
 
-def create_output_csv(id, timestamps_list, file_name, ):
+def create_output_csv(id, timestamps_list, file_name,context_onset,context_offset):
     '''Creates a csv output of created templates
     '''
     print("Making output csv...")
-    selected = pd.DataFrame(columns = ['id', 'clip_num', 'onset', 'offset'], dtype=int)
+    selected = pd.DataFrame(columns = ['id', 'clip_num', 'onset', 'offset','context_onset','context_offset'], dtype=int)
     for i, ts in enumerate(timestamps_list):
         selected = selected.append({'id': id,
                                     'clip_num': i+1,
                                     'onset': ts[0]/60000,
-                                    'offset': ts[1]/60000},
+                                    'offset': ts[1]/60000,
+                                    'context_onset': ts[0]/60000-int(context_onset),
+                                    'context_offset': ts[1]/60000+int(context_offset)},
                                     ignore_index=True)
-    selected[['id', 'clip_num', 'onset', 'offset']] = selected[['id', 'clip_num', 'onset', 'offset']]
+    selected[['id', 'clip_num', 'onset', 'offset','context_onset','context_offset']] = selected[['id', 'clip_num', 'onset', 'offset','context_onset','context_offset']]
     selected.to_csv(file_name,index=False)
 
