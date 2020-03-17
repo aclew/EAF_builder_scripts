@@ -72,6 +72,8 @@ def create_eaf(etf_path, id, output_dir, timestamps_list, eaf_type,contxt_on, co
     eaf.add_tier("context", ling=ling_type)
     eaf.add_tier("code_num", ling=ling_type)
     eaf.add_tier("on_off", ling=ling_type)
+    eaf.add_tier("notes", ling=ling_type)
+    eaf.add_tier("remember-me", ling=ling_type)
     for i, ts in enumerate(timestamps_list):
         print(timestamps_list)
         print("Creating eaf code segment # ", i+1)
