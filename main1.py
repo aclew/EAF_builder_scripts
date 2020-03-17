@@ -14,13 +14,14 @@ def main():
     parser.add_argument('--skip',help='Interstimulis interval for periodic method')
     parser.add_argument('--c_on',help='Context onset and actual code onset difference')
     parser.add_argument('--c_off',help='Context offset and actual code offset difference')
+    parser.add_argument('--temp',help='Type "basic","native" or "non-native" up to your choice of ACLEW template.')
 
     args= parser.parse_args()
     #Treating different EAF options an exceptions
     if args.eaf_type.lower()=='periodic':
-        create_all_type_eaf(args.wav_folder,args.output_folder,choose_onsets_periodic,args.eaf_type,args.t,args.c_on,args.c_off, args.skip)
+        create_all_type_eaf(args.wav_folder,args.output_folder,choose_onsets_periodic,args.eaf_type,args.t,args.c_on,args.c_off,args.temp,args.skip)
     if args.eaf_type.lower()=='random':
-        create_all_type_eaf(args.wav_folder,args.output_folder,choose_onsets_random,args.eaf_type,args.t,args.c_on,args.c_off,args.n)
+        create_all_type_eaf(args.wav_folder,args.output_folder,choose_onsets_random,args.eaf_type,args.t,args.c_on,args.c_off,args.temp,args.n)
     elif args.eaf_type.lower()!='random' and args.eaf_type.lower()!='periodic':
         print("Sorry this type of eaf does not exist please type 'random' or 'periodic'.")
 

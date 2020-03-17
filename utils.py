@@ -7,11 +7,16 @@ import sox
 import numpy as np
 import pympi
 
-def choose_template():
+def choose_template(template):
     """
-    Update: We have only one templates to use; all tiers
+    Update: Choose between three template.Basic, native and non-native.
     """
-    return 'etf_templates/ACLEW-basic-template_all-tiers.etf', 'etf_templates/ACLEW-basic-template_all-tiers.pfsx'
+    if template == 'basic':
+        return 'etf_templates/ACLEW-basic-template_all-tiers.etf', 'etf_templates/ACLEW-basic-template_all-tiers.pfsx'
+    if template == 'native':
+        return 'etf_templates/ACLEW-LAAC-native.etf','etf_templates/ACLEW-LAAC-native.pfsx'
+    if template == 'non-native':
+        return 'etf_templates/ACLEW-LAAC-non-native.etf','etf_templates/ACLEW-LAAC-non-native.pfsx'
 
 def choose_onsets_random(l,n, t, start=10, end=0):
     """

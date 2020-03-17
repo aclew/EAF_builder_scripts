@@ -14,7 +14,7 @@ Creates a generic eaf, proper both to random and periodic method
 """
 
 
-def create_all_type_eaf(folder,output_dir,onset_function,eaf_type,t,contx_onset,contx_offset,*args):
+def create_all_type_eaf(folder,output_dir,onset_function,eaf_type,t,contx_onset,contx_offset,template,*args):
     """
     Create eaf files from wav files, in random onset choice
     Args: 
@@ -45,10 +45,10 @@ def create_all_type_eaf(folder,output_dir,onset_function,eaf_type,t,contx_onset,
         timestamps.sort(key=lambda tup: tup[0])
 
         # retrieve right age templates
-        etf_path, pfsx_path = choose_template()
+        etf_path, pfsx_path = choose_template(template)
 
         # create
         print("making the eaf file")
         create_eaf(etf_path,record[0]+eaf_type, output_dir, timestamps,eaf_type,contx_onset,contx_offset)
-        shutil.copy(pfsx_path, os.path.join(output_dir, "{}.pfsx".format(record[0]+'_'+eaf_type)))
-        selected=create_output_csv(record[0], timestamps, os.path.join(output_dir,"{}.csv".format(record[0]+'_'+eaf_type)),contx_onset,contx_offset)
+        shutil.copy(pfsx_path, os.path.join(output_dir, "{}.pfsx".format(record[0]+'_'+eaf_type+'_'+template)))
+        selected=create_output_csv(record[0], timestamps, os.path.join(output_dir,"{}.csv".format(record[0]+'_'+eaf_type+'_'+template)),contx_onset,contx_offset)
