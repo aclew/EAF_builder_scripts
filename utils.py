@@ -81,8 +81,8 @@ def create_eaf(etf_path, id, output_dir, timestamps_list, eaf_type,contxt_on, co
         whole_region_onset = ts[0]
         whole_region_offset = ts[1]
         #print whole_region_offset, whole_region_onset
-        context_onset = whole_region_onset - int(contxt_on)*60000 #representation in minutes
-        context_offset = whole_region_offset + int(contxt_off)*60000 #representation in minutes
+        context_onset = whole_region_onset - int(contxt_on) #representation in minutes
+        context_offset = whole_region_offset + int(contxt_off) #representation in minutes
         if context_onset < 0:
             context_onset = 0.0
         print("context range: ", context_onset, context_offset)
@@ -105,10 +105,10 @@ def create_output_csv(id, timestamps_list, file_name,context_onset,context_offse
     for i, ts in enumerate(timestamps_list):
         selected = selected.append({'id': id,
                                     'clip_num': i+1,
-                                    'onset': ts[0]/60000,
-                                    'offset': ts[1]/60000,
-                                    'context_onset': ts[0]/60000-int(context_onset),
-                                    'context_offset': ts[1]/60000+int(context_offset)},
+                                    'onset': ts[0],
+                                    'offset': ts[1],
+                                    'context_onset': ts[0]-int(context_onset),
+                                    'context_offset': ts[1]+int(context_offset)},
                                     ignore_index=True)
     selected[['id', 'clip_num', 'onset', 'offset','context_onset','context_offset']] = selected[['id', 'clip_num', 'onset', 'offset','context_onset','context_offset']]
     selected.to_csv(file_name,index=False)

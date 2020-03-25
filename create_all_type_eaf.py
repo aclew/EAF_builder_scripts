@@ -41,7 +41,7 @@ def create_all_type_eaf(folder,output_dir,onset_function,eaf_type,t,contx_onset,
     for record in record_list:
         # choose regions (5 by default)
         timestamps = onset_function(int(record[2]),args,t) #onset fix, should be generic for every type of eaf
-        timestamps = [(x * 60000, y * 60000) for x, y in timestamps]
+        timestamps = [(x , y ) for x, y in timestamps]
         timestamps.sort(key=lambda tup: tup[0])
 
         # retrieve right age templates
