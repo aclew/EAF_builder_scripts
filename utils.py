@@ -32,7 +32,7 @@ def choose_onsets_random(l,n, t, start=10, end=0):
     """
     print("choosing random onsets")
     minute_tuple_raw_list=[] #tuple of integers (begin_min,end_min) before skip condition applied
-    minute_range = list(range(start, min(l - int(t[0]), l-end))) 
+    minute_range = list(range(start, min(l - int(t[0]*1000), l-end))) 
     #for some raison t,n and skip 
     #values recovered from argparse have a tuple form like (t,) so we take int(t[0])
     random_minute_range=random.sample(list(minute_range),int(n[0])) #remplaced of shuffle with sample
@@ -57,8 +57,8 @@ def choose_onsets_periodic(l,skip, t, start=34, end=0):
     	A list of tuples which contains onset-offset couples in periodic intervals
     """
     print("choosing periodic onsets")
-    minute_range = [x for x in np.arange(start,min(l - int(t[0]), l-end),int(skip[0])+int(t[0]))] #creates skipped list of numbers
-    periodic_minute_range=[(i,i+int(t[0])) for i in minute_range]#creates t min apart tuple couples
+    minute_range = [x for x in np.arange(start,min(l - int(t[0]*1000), l-end),int(skip[0])+int(t[0]))] #creates skipped list of numbers
+    periodic_minute_range=[(i,i+int(t[0]*1000)) for i in minute_range]#creates t min apart tuple couples
     
     return periodic_minute_range
 
@@ -81,8 +81,8 @@ def create_eaf(etf_path, id, output_dir, timestamps_list, eaf_type,contxt_on, co
         whole_region_onset = ts[0]
         whole_region_offset = ts[1]
         #print whole_region_offset, whole_region_onset
-        context_onset = whole_region_onset - int(contxt_on)*60000 #representation in minutes
-        context_offset = whole_region_offset + int(contxt_off)*60000 #representation in minutes
+        context_onset = whole_region_onset - int(contxt_on) #representation in minutes
+        context_offset = whole_region_offset + int(contxt_off) #representation in minutes
         if context_onset < 0:
             context_onset = 0.0
         print("context range: ", context_onset, context_offset)
@@ -105,10 +105,10 @@ def create_output_csv(id, timestamps_list, file_name,context_onset,context_offse
     for i, ts in enumerate(timestamps_list):
         selected = selected.append({'id': id,
                                     'clip_num': i+1,
-                                    'onset': ts[0]/60000,
-                                    'offset': ts[1]/60000,
-                                    'context_onset': ts[0]/60000-int(context_onset),
-                                    'context_offset': ts[1]/60000+int(context_offset)},
+                                    'onset': ts[0],
+                                    'offset': ts[1],
+                                    'context_onset': ts[0]-int(context_onset),
+                                    'context_offset': ts[1]+int(context_offset)},
                                     ignore_index=True)
     selected[['id', 'clip_num', 'onset', 'offset','context_onset','context_offset']] = selected[['id', 'clip_num', 'onset', 'offset','context_onset','context_offset']]
     selected.to_csv(file_name,index=False)
