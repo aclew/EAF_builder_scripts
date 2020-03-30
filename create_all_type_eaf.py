@@ -41,7 +41,7 @@ def create_all_type_eaf(folder,output_dir,onset_function,eaf_type,t,contx_onset,
     for record in record_list:
         # choose regions (5 by default)
         timestamps = onset_function(int(record[2]),args,t) #onset fix, should be generic for every type of eaf
-        timestamps = [(x * 60, y * 60) for x, y in timestamps]
+        timestamps = [(x*60000 , y*60000) for x, y in timestamps] #retranformation to miliseconds for eaf
         timestamps.sort(key=lambda tup: tup[0])
 
         # retrieve right age templates
@@ -49,6 +49,6 @@ def create_all_type_eaf(folder,output_dir,onset_function,eaf_type,t,contx_onset,
 
         # create
         print("making the eaf file")
-        create_eaf(etf_path,record[0]+eaf_type, output_dir, timestamps,eaf_type,contx_onset,contx_offset)
+        create_eaf(etf_path,record[0]+eaf_type, output_dir, timestamps,eaf_type,contx_onset,contx_offset,template)
         shutil.copy(pfsx_path, os.path.join(output_dir, "{}.pfsx".format(record[0]+'_'+eaf_type+'_'+template)))
         selected=create_output_csv(record[0], timestamps, os.path.join(output_dir,"{}.csv".format(record[0]+'_'+eaf_type+'_'+template)),contx_onset,contx_offset)

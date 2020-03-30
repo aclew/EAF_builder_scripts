@@ -6,15 +6,22 @@ This repo contains the script for creating periodicly or randomly selected ELAN 
 
 -Create_all_type_eaf contains a generic eaf generator code for periodic and random methods.
 
+## PACKAGE REQUIREMENTS:
+
+* pandas
+* pympi
+* sox
+* numpy
+
 ## For launching the code:
 
 	python3 main1.py 'path_to_your_wav_folder' 'path_to_new_eaf_store_file' 'periodic or random(choose one)' --t 'int' --n/--skip 'int' (skip if periodic, n if random) --c_on 'int' --c_off 'int' --temp 'basic or native or non-native'
 
-* --t is the length of choosen chunks
-* --skip is the interstimulis interval for the periodic method
+* --t is the length of choosen chunks in minutes
+* --skip is the interstimulis interval for the periodic method in minutes
 * --n is the number of chunks to be chosen for the random method
-* --c_on is the difference between code onset and context onset
-* --c_off is the difference between code offset and context offset
+* --c_on is the difference between code onset and context onset in minutes
+* --c_off is the difference between code offset and context offset in minutes
 * --temp is the choice of templates between basic, native or non-native(only vcm for all tiers including CHI)
 
 ### SOME EXAMPLES:
