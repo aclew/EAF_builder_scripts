@@ -6,6 +6,8 @@ import itertools
 import sox
 import numpy as np
 import pympi
+from rpy2 import robjects as r
+from datetime import datetime, date, time, timezone
 
 def choose_template(template):
     """
@@ -22,13 +24,13 @@ def choose_onsets_random(l,n, t, start=10, end=0):
     """
     Function whic sets onset-offset couples in a random way
     Args:
-        int l: length of recording in secondes
-        int n: number of random segments to choose
-        int t: length of the chosen segments for annotation
-        int start: the delay value from the beginnig of the sound file
-        int end: the delay value before the ending of the sound file
+    	int l: length of recording in secondes
+    	int n: number of random segments to choose
+    	int t: length of the chosen segments for annotation
+    	int start: the delay value from the beginnig of the sound file
+    	int end: the delay value before the ending of the sound file
     Returns:
-        A list of tuples which contains onset-offset couples in random intervals
+    	A list of tuples which contains onset-offset couples in random intervals
     """
 
     print("choosing random onsets")
@@ -45,67 +47,127 @@ def choose_onsets_random(l,n, t, start=10, end=0):
                 break
         else:
             minute_tuple_raw_list.append((start, stop))
-    print(minute_tuple_raw_list)
-    return minute_tuple_raw_list
+    random_milisec_range=[(x*60000 , y*60000) for x, y in minute_tuple_raw_list]#retranformation to miliseconds for eaf
+    return random_milisec_range
 
 def choose_onsets_periodic(l,skip, t, start=34, end=0):
     """Function which sets onset-offset couples with a periodic interstimulus interval (skip)
     Args:
-        int l: length of recording in secondes
-        int skip: interstimulus interval, 60 as default
-        int t: length of the chosen segments for annotation
-        int end: the delay value before the ending of the sound file
+    	int l: length of recording in secondes
+    	int skip: interstimulus interval, 60 as default
+    	int t: length of the chosen segments for annotation
+    	int end: the delay value before the ending of the sound file
     Returns:
-        A list of tuples which contains onset-offset couples in periodic intervals
+    	A list of tuples which contains onset-offset couples in periodic intervals
     """
 
     print("choosing periodic onsets")
     l=int(l/60) #transform seconds to minutes
     minute_range = [x for x in np.arange(start,min(l - int(t[0]), l-end),int(skip[0])+int(t[0]))] #creates skipped list of numbers
     periodic_minute_range=[(i,i+int(t[0])) for i in minute_range]#creates t min apart tuple couples
-    
-    return periodic_minute_range
+    periodic_milisec_range=[(x*60000, y*60000) for x, y in periodic_minute_range] #retranformation to miliseconds for eaf
+    return periodic_milisec_range
 
-def create_eaf(etf_path, id, output_dir, timestamps_list, eaf_type,contxt_on, contxt_off,template):
+def compile_files(file):
+    """
+    This function compiles an r function to access RLena package then do the 
+    """
+    r.r.source("rlena_extract.R") #access to r file
+    output = r.r["rlena_extraction"](file) #access to function
+    file_start=pd.read_csv("Time_info.csv",delimiter=',',names=['startClockTime'],skiprows=1)
+
+    file1=pd.read_csv("CTC.csv",delimiter=',',names=['Group.1','x'],skiprows=1)
+
+    #calculate the 
+    start_time=datetime.strptime(file_start['startClockTime'].iloc[0],"%Y-%m-%d %H:%M:%S")
+    CTC_start=datetime.strptime(file1['Group.1'].iloc[0],"%Y-%m-%d %H:%M")
+
+    startsecCTC=start_time-CTC_start
+    return startsecCTC
+
+def get_time_adjustements(file,its_types):
+    """
+    This function takes a csv file which contains time informartion and volubility sore information. It transforms time information to 5 min chunks with their respective score, then sort n chunks with highest volubility score.
+    Returns a dicionnary as a key its information type ans its timestamps.
+    Args:
+        its_types:list of demanded its information type: CTC, AWC,CVC
+        n: number of chunks
+    Retuns:
+        A dictionnary.
+
+    """
+    dict_time_lapses={}
+    startdiff=compile_files(file)
+    for i in its_types:
+        df=pd.read_csv(i+'.csv',delimiter=',',names=['Group.1','x'],skiprows=1)
+        list_onsets=[] #reinitialize for new key
+        begin=startdiff.total_seconds()
+        for index, row in df.iterrows():
+            list_onsets.append(((begin,begin+300),row['x'])) #create 5 min time stamps and their score associated
+            begin+=300
+        list_onsets.sort(key=lambda x:x[1],reverse=True) #sort by the score
+        time_tuple_list=[list_onsets[0] for list_onsets in list_onsets]
+        milisec_its_range=[(x*1000 , y*1000) for x, y in time_tuple_list]#retranformation to miliseconds for eaf
+        dict_time_lapses[i]=milisec_its_range
+    return dict_time_lapses #return n chunks demanded
+
+def create_eaf(etf_path, id, output_dir, timestamps_list, eaf_type,contxt_on, contxt_off,template,its_timestamps_dict):
     
     print("ACLEW ID: ", id)
-    eafob = pympi.Elan.Eaf(etf_path)
     eaf = pympi.Elan.Eaf(etf_path)
     ling_type = "transcription"
-    eaf.add_tier("code", ling=ling_type)
-    eaf.add_tier("context", ling=ling_type)
-    eaf.add_tier("code_num", ling=ling_type)
-    eaf.add_tier("on_off", ling=ling_type)
-    eaf.add_tier("notes", ling=ling_type)
-    eaf.add_tier("remember-me", ling=ling_type)
+    eaf.add_tier("code_"+eaf_type, ling=ling_type)
+    eaf.add_tier("context_"+eaf_type, ling=ling_type)
+    eaf.add_tier("code_num_"+eaf_type, ling=ling_type)
     for i, ts in enumerate(timestamps_list):
-        print(timestamps_list)
         print("Creating eaf code segment # ", i+1)
         print("enumerate makes: ", i, ts)
         whole_region_onset = ts[0]
         whole_region_offset = ts[1]
         #print whole_region_offset, whole_region_onset
-        context_onset = int(float(whole_region_onset) - float(contxt_on)*60000) #representation in minutes
+        context_onset = int(float(whole_region_onset) - float(contxt_on)*60000)
         #for float / integer unmatch float()
-        context_offset = int(float(whole_region_offset) + float(contxt_off)*60000) #representation in minutes
+        context_offset = int(float(whole_region_offset) + float(contxt_off)*60000)
         if context_onset < 0:
             context_onset = 0.0
-        print("context range: ", context_onset,context_offset)
-        print("code range: ", whole_region_onset, whole_region_offset)
-        print("on_off: ", "{}_{}".format(whole_region_onset, whole_region_offset))
+        print("context range: ", context_onset/60000,context_offset/60000)
+        print("code range: ", whole_region_onset/60000, whole_region_offset/60000)
+        print("on_off: ", "{}_{}".format(whole_region_onset/60000, whole_region_offset/60000))
         codeNumVal = eaf_type + str(i+1)
         print("code_num", codeNumVal)
-        eaf.add_annotation("code", whole_region_onset, whole_region_offset)
-        eaf.add_annotation("code_num", whole_region_onset, whole_region_offset, value=codeNumVal)
-        eaf.add_annotation("on_off", whole_region_onset, whole_region_offset, value="{}_{}".format(whole_region_onset, whole_region_offset))
-        eaf.add_annotation("context", context_onset, context_offset)
-    eaf.to_file(os.path.join(output_dir, "{}.eaf".format(id+'_'+template)))
+        eaf.add_annotation("code_"+eaf_type, whole_region_onset, whole_region_offset)
+        eaf.add_annotation("code_num_"+eaf_type, whole_region_onset, whole_region_offset, value=codeNumVal)
+        eaf.add_annotation("context_"+eaf_type, context_onset, context_offset)
+    if its_timestamps_dict!=None: #if there is its files to add
+        for k,v in its_timestamps_dict.items(): #its types timestamps dictionnary
+            print(k)
+            eaf.add_tier("code_"+k, ling=ling_type)
+            eaf.add_tier("context_"+k, ling=ling_type)
+            eaf.add_tier("code_num_its"+k, ling=ling_type)
+            eaf.add_tier("notes", ling=ling_type)
+            eaf.add_tier("remember-me", ling=ling_type)
+            for i,(on,off) in enumerate(v):
+                print("Creating eaf code segment # ", i+1)
+                context_beg = int(float(on) - float(contxt_on)*60000)
+                context_end = int(float(off) + float(contxt_off)*60000)
+                if context_beg<0:
+                    context_beg==0.0
+                print("context range: ", context_beg/60000,context_end/60000)
+                print("code range: ", on/60000, off/60000)
+                print("on_off: ", "{}_{}".format(on/60000, off/60000))
+                codeNumVal = k + str(i+1)
+                print("code_num_its", codeNumVal)
+                eaf.add_annotation("code_"+k, int(on), int(off))
+                eaf.add_annotation("code_num_its"+k, int(on), int(off), value=codeNumVal)
+                eaf.add_annotation("context_"+k, context_beg, context_end)
+    eaf.to_file(os.path.join(output_dir, "{}.eaf".format(id)))
+    for i in eaf.get_tier_names():
+        print(i,":",eaf.get_annotation_data_for_tier(i))
     return eaf
 
 def create_output_csv(id, timestamps_list, file_name,context_onset,context_offset):
-    '''Creates a csv output of created templates
+    '''Creates a csv output of created eafs
     '''
-    print("Making output csv...")
     selected = pd.DataFrame(columns = ['id', 'clip_num', 'onset', 'offset','context_onset','context_offset'], dtype=int)
     for i, ts in enumerate(timestamps_list):
         selected = selected.append({'id': id,
@@ -117,3 +179,4 @@ def create_output_csv(id, timestamps_list, file_name,context_onset,context_offse
                                     ignore_index=True)
     selected[['id', 'clip_num', 'onset', 'offset','context_onset','context_offset']] = selected[['id', 'clip_num', 'onset', 'offset','context_onset','context_offset']]
     selected.to_csv(file_name,index=False)
+
