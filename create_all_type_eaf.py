@@ -6,7 +6,7 @@ import itertools
 import sox
 import numpy as np
 import pympi
-from utils import choose_onsets_periodic, choose_onsets_random,create_eaf,create_output_csv,choose_template, get_time_adjustements
+from utils import choose_onsets_periodic, choose_onsets_random,create_eaf,create_output_csv,create_output_csv_its,choose_template, get_time_adjustements
 
 
 """
@@ -96,16 +96,17 @@ def create_all_type_eaf_multiple(folder,output_dir,onset_function,eaf_type,t,con
             list_removed=[]
             dict_removed={}
             if overlap.lower() == 'n': #if utilisator doesn't want to have overlap time segments between its information and periodic/random methods
-                for start, stop in timestamps_wav:
+                for high, low in timestamps_wav:
                     for k, v in timestamps_its.items():
                         list_removed=[]
-                        for high,low in v:
-                            if (low < start < high) or (low < stop < high): #delate overlapping time lapses
-                                list_removed.append((high,low))
-                                v.remove((high,low))
-                        dict_removed[k]=list_removed
+                        for (start,stop),score in v:
+                            if (low >start > high) or (low > stop > high) or (low <start < high) or (low < stop < high) or (start >low > stop) or (start >high> stop) or (start <low < stop) or  (start <high< stop): #delate overlapping time lapse
+                                list_removed.append((start,stop))
+                                v.remove(((start,stop),score))
+                        if list_removed!=[]:
+                            dict_removed[k]=list_removed
         
-                if len(dict_removed.values()) !=0: #if there are delated segements because of overlapping restraction
+                if len(dict_removed.keys()) !=0: #if there are delated segements because of overlapping restraction
                     print("WARNING! Removed segments because of overlapping restraction:")
                     print(dict_removed)
 
@@ -125,7 +126,7 @@ def create_all_type_eaf_multiple(folder,output_dir,onset_function,eaf_type,t,con
             for k,v in timestamps_its.items():
                 print("making the "+k+" csv file")
                 #create csv for all its types
-                create_output_csv(record[0], v, os.path.join(output_dir,"{}.csv".format(record[0]+'_'+eaf_type+'_'+template+'_its_'+k)),contx_onset,contx_offset)
+                create_output_csv_its(record[0], v, os.path.join(output_dir,"{}.csv".format(record[0]+'_'+eaf_type+'_'+template+'_its_'+k)),contx_onset,contx_offset)
         else:
             print("Could not find the .its file for this record. Only random/periodic option to be generated.")
             create_all_type_eaf(folder,output_dir,onset_function,eaf_type,t,contx_onset,contx_offset,template,*args)

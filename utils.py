@@ -7,7 +7,7 @@ import sox
 import numpy as np
 import pympi
 from rpy2 import robjects as r
-from datetime import datetime, date, time, timezone
+from datetime import datetime, date, time
 
 def choose_template(template):
     """
@@ -76,14 +76,14 @@ def compile_files(file):
     output = r.r["rlena_extraction"](file) #access to function
     file_start=pd.read_csv("Time_info.csv",delimiter=',',names=['startClockTime'],skiprows=1)
 
-    file1=pd.read_csv("CTC.csv",delimiter=',',names=['Group.1','x'],skiprows=1)
+    file1=pd.read_csv("CVC.csv",delimiter=',',names=['Group.1','x'],skiprows=1)
 
     #calculate the 
     start_time=datetime.strptime(file_start['startClockTime'].iloc[0],"%Y-%m-%d %H:%M:%S")
-    CTC_start=datetime.strptime(file1['Group.1'].iloc[0],"%Y-%m-%d %H:%M")
+    CVC_start=datetime.strptime(file1['Group.1'].iloc[0],"%Y-%m-%d %H:%M")
 
-    startsecCTC=start_time-CTC_start
-    return startsecCTC
+    startsecCVC=(CVC_start-starttime) #in minutes
+    return startsecCVC
 
 def get_time_adjustements(file,its_types):
     """
@@ -101,13 +101,13 @@ def get_time_adjustements(file,its_types):
     for i in its_types:
         df=pd.read_csv(i+'.csv',delimiter=',',names=['Group.1','x'],skiprows=1)
         list_onsets=[] #reinitialize for new key
-        begin=startdiff.total_seconds()
+        begin=startdiff.seconds
+        print('begin:',begin)
         for index, row in df.iterrows():
             list_onsets.append(((begin,begin+300),row['x'])) #create 5 min time stamps and their score associated
             begin+=300
         list_onsets.sort(key=lambda x:x[1],reverse=True) #sort by the score
-        time_tuple_list=[list_onsets[0] for list_onsets in list_onsets]
-        milisec_its_range=[(x*1000 , y*1000) for x, y in time_tuple_list]#retranformation to miliseconds for eaf
+        milisec_its_range=[((x*1000 , y*1000),z) for (x, y),z in list_onsets]#retranformation to miliseconds for eaf
         dict_time_lapses[i]=milisec_its_range
     return dict_time_lapses #return n chunks demanded
 
@@ -130,33 +130,24 @@ def create_eaf(etf_path, id, output_dir, timestamps_list, eaf_type,contxt_on, co
         context_offset = int(float(whole_region_offset) + float(contxt_off)*60000)
         if context_onset < 0:
             context_onset = 0.0
-        print("context range: ", context_onset/60000,context_offset/60000)
-        print("code range: ", whole_region_onset/60000, whole_region_offset/60000)
-        print("on_off: ", "{}_{}".format(whole_region_onset/60000, whole_region_offset/60000))
         codeNumVal = eaf_type + str(i+1)
-        print("code_num", codeNumVal)
         eaf.add_annotation("code_"+eaf_type, whole_region_onset, whole_region_offset)
         eaf.add_annotation("code_num_"+eaf_type, whole_region_onset, whole_region_offset, value=codeNumVal)
         eaf.add_annotation("context_"+eaf_type, context_onset, context_offset)
     if its_timestamps_dict!=None: #if there is its files to add
         for k,v in its_timestamps_dict.items(): #its types timestamps dictionnary
-            print(k)
             eaf.add_tier("code_"+k, ling=ling_type)
             eaf.add_tier("context_"+k, ling=ling_type)
             eaf.add_tier("code_num_its"+k, ling=ling_type)
             eaf.add_tier("notes", ling=ling_type)
             eaf.add_tier("remember-me", ling=ling_type)
-            for i,(on,off) in enumerate(v):
+            for i,((on,off),score) in enumerate(v):
                 print("Creating eaf code segment # ", i+1)
                 context_beg = int(float(on) - float(contxt_on)*60000)
                 context_end = int(float(off) + float(contxt_off)*60000)
                 if context_beg<0:
                     context_beg==0.0
-                print("context range: ", context_beg/60000,context_end/60000)
-                print("code range: ", on/60000, off/60000)
-                print("on_off: ", "{}_{}".format(on/60000, off/60000))
                 codeNumVal = k + str(i+1)
-                print("code_num_its", codeNumVal)
                 eaf.add_annotation("code_"+k, int(on), int(off))
                 eaf.add_annotation("code_num_its"+k, int(on), int(off), value=codeNumVal)
                 eaf.add_annotation("context_"+k, context_beg, context_end)
@@ -178,5 +169,21 @@ def create_output_csv(id, timestamps_list, file_name,context_onset,context_offse
                                     'context_offset': int(float(ts[1])+float(context_offset))},
                                     ignore_index=True)
     selected[['id', 'clip_num', 'onset', 'offset','context_onset','context_offset']] = selected[['id', 'clip_num', 'onset', 'offset','context_onset','context_offset']]
+    selected.to_csv(file_name,index=False)
+
+def create_output_csv_its(id, timestamps_list, file_name,context_onset,context_offset):
+    '''Creates a csv output of created eafs for its file with score 
+    '''
+    selected = pd.DataFrame(columns = ['id', 'clip_num', 'onset', 'offset','context_onset','context_offset'], dtype=int)
+    for i, ((ts1,ts2),score) in enumerate(timestamps_list):
+        selected = selected.append({'id': id,
+                                    'clip_num': i+1,
+                                    'onset': ts1,
+                                    'offset': ts2,
+                                    'context_onset': int(float(ts1)-float(context_onset)),
+                                    'context_offset': int(float(ts2)+float(context_offset)),
+                                    'score':score},
+                                    ignore_index=True)
+    selected[['id', 'clip_num', 'onset', 'offset','context_onset','context_offset','score']] = selected[['id', 'clip_num', 'onset', 'offset','context_onset','context_offset','score']]
     selected.to_csv(file_name,index=False)
 
