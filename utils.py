@@ -82,7 +82,7 @@ def compile_files(file):
     start_time=datetime.strptime(file_start['startClockTime'].iloc[0],"%Y-%m-%d %H:%M:%S")
     CVC_start=datetime.strptime(file1['Group.1'].iloc[0],"%Y-%m-%d %H:%M")
 
-    startsecCVC=(CVC_start-starttime) #in minutes
+    startsecCVC=(CVC_start-start_time) #in minutes
     return startsecCVC
 
 def get_time_adjustements(file,its_types):
