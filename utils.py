@@ -68,24 +68,28 @@ def choose_onsets_periodic(l,skip, t, start=34, end=0):
     periodic_milisec_range=[(x*60000, y*60000) for x, y in periodic_minute_range] #retranformation to miliseconds for eaf
     return periodic_milisec_range
 
-def compile_files(file):
+def compile_files(file,output_dir):
     """
     This function compiles an r function to access RLena package then do the 
     """
-    r.r.source("rlena_extract.R") #access to r file
-    output = r.r["rlena_extraction"](file) #access to function
-    file_start=pd.read_csv("Time_info.csv",delimiter=',',names=['startClockTime'],skiprows=1)
 
-    file1=pd.read_csv("CVC.csv",delimiter=',',names=['Group.1','x'],skiprows=1)
+    r.r.source("rlena_extract.R") #access to r file
+    output = r.r["rlena_extraction"](file,output_dir) #access to function
+    file_start=pd.read_csv(output_dir+'/'+"Time_info.csv",delimiter=',',names=['startClockTime'],skiprows=1)
+
+    for filename in os.listdir(output_dir):
+        if filename != "Time_info.csv":
+            file1=pd.read_csv(output_dir+'/'+filename,delimiter=',',names=['Group.1','x'],skiprows=1)
+            break
 
     #calculate the 
     start_time=datetime.strptime(file_start['startClockTime'].iloc[0],"%Y-%m-%d %H:%M:%S")
-    CVC_start=datetime.strptime(file1['Group.1'].iloc[0],"%Y-%m-%d %H:%M")
+    actual_start=datetime.strptime(file1['Group.1'].iloc[1],"%Y-%m-%d %H:%M") #take secod value
 
-    startsecCVC=(start_time-CVC_start) #in minutes
-    return startsecCVC
+    startsec=(actual_start-start_time) #in minutes
+    return startsec
 
-def get_time_adjustements(file,its_types):
+def get_time_adjustements(file,its_types,output_dir):
     """
     This function takes a csv file which contains time informartion and volubility sore information. It transforms time information to 5 min chunks with their respective score, then sort n chunks with highest volubility score.
     Returns a dicionnary as a key its information type ans its timestamps.
@@ -97,13 +101,12 @@ def get_time_adjustements(file,its_types):
 
     """
     dict_time_lapses={}
-    startdiff=compile_files(file)
+    startdiff=compile_files(file,output_dir)
     for i in its_types:
-        df=pd.read_csv(i+'.csv',delimiter=',',names=['Group.1','x'],skiprows=1)
+        df=pd.read_csv(output_dir+'/'+i+'.csv',delimiter=',',names=['Group.1','x'],skiprows=1)
         list_onsets=[] #reinitialize for new key
         begin=startdiff.seconds
-        print('begin:',begin)
-        for index, row in df.iterrows():
+        for index, row in df.iloc[1:].iterrows(): #skip first chunk because not 5min
             list_onsets.append(((begin,begin+300),row['x'])) #create 5 min time stamps and their score associated
             begin+=300
         list_onsets.sort(key=lambda x:x[1],reverse=True) #sort by the score

@@ -13,9 +13,10 @@ This repo contains the script for creating periodicly or randomly selected ELAN 
 * sox
 * numpy
 * rpy2
+
 ## For launching the code:
 
-	python3 main1.py 'path_to_your_wav_folder' 'path_to_new_eaf_store_file' 'periodic or random(choose one)' --t 'int' --n/--skip 'int' (skip if periodic, n if random) --c_on 'int' --c_off 'int' --temp 'basic or native or non-native'
+	python3 main1.py 'path_to_your_wav_folder' 'path_to_new_eaf_store_file' 'periodic or random(choose one)' --t 'int' --n/--skip 'int' (skip if periodic, n if random) --c_on 'int' --c_off 'int' --temp 'basic or native or non-native' --its 'y/n'
 
 * --t is the length of choosen chunks in minutes
 * --skip is the interstimulis interval for the periodic method in minutes

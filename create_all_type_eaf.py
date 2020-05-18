@@ -6,6 +6,7 @@ import itertools
 import sox
 import numpy as np
 import pympi
+from rpy2 import robjects as r
 from utils import choose_onsets_periodic, choose_onsets_random,create_eaf,create_output_csv,create_output_csv_its,choose_template, get_time_adjustements
 
 
@@ -27,7 +28,7 @@ def create_all_type_eaf(folder,output_dir,onset_function,eaf_type,t,contx_onset,
     """
 
 
-    os.makedirs(output_dir, exist_ok=True)
+
     record_list = []
  
     for dirpath, dirnames, wavfiles in os.walk(folder): #getting into folder for proccessing files
@@ -39,17 +40,18 @@ def create_all_type_eaf(folder,output_dir,onset_function,eaf_type,t,contx_onset,
   
     for record in record_list:
         # choose regions (5 by default)
+        os.makedirs(output_dir+'/'+record[0], exist_ok=True)
         timestamps = onset_function(int(record[2]),args,t) #onset fix, should be generic for every type of eaf
         timestamps.sort(key=lambda tup: tup[0])
         print("timestamps: ",len(timestamps))
         # retrieve right age templates
         etf_path, pfsx_path = choose_template(template)
-
+        
         # create
         print("making the eaf file")
-        create_eaf(etf_path,record[0]+'_'+eaf_type+'_'+template, output_dir, timestamps,eaf_type,contx_onset,contx_offset,template,None)
-        shutil.copy(pfsx_path, os.path.join(output_dir, "{}.pfsx".format(record[0]+'_'+eaf_type+'_'+template)))
-        create_output_csv(record[0], timestamps, os.path.join(output_dir,"{}.csv".format(record[0]+'_'+eaf_type+'_'+template)),contx_onset,contx_offset,None)
+        create_eaf(etf_path,record[0]+'_'+eaf_type+'_'+template, output_dir+'/'+record[0], timestamps,eaf_type,contx_onset,contx_offset,template,None)
+        shutil.copy(pfsx_path, os.path.join(output_dir+'/'+record[0], "{}.pfsx".format(record[0]+'_'+eaf_type+'_'+template)))
+        create_output_csv(record[0], timestamps, os.path.join(output_dir+'/'+record[0],"{}.csv".format(record[0]+'_'+eaf_type+'_'+template)),contx_onset,contx_offset)
 
 
 def create_all_type_eaf_multiple(folder,output_dir,onset_function,eaf_type,t,contx_onset,contx_offset,template,n_its,its_types,overlap,*args):
@@ -73,7 +75,7 @@ def create_all_type_eaf_multiple(folder,output_dir,onset_function,eaf_type,t,con
 
     os.makedirs(output_dir, exist_ok=True)
     record_list = []
- 
+    
     for dirpath, dirnames, wavfiles in os.walk(folder): #getting into folder for proccessing files
         files= [f for f in wavfiles if f.endswith(".wav")] #exclude Ds.store
         its=[f for f in wavfiles if f.endswith(".its")]
@@ -84,13 +86,14 @@ def create_all_type_eaf_multiple(folder,output_dir,onset_function,eaf_type,t,con
             else:
                 record_list.append([f.split('.')[0],dirpath+'/'+f,duration])
 
-  
+    r.r.source("package_install.R")#get the rlena install from package_install file
     for record in record_list:
         print(record)
+        os.makedirs(output_dir+'/'+record[0], exist_ok=True)
         timestamps_wav = onset_function(int(record[2]),args,t) #onset fix, should be generic for every type of eaf
         timestamps_wav.sort(key=lambda tup: tup[0])
         if len(record)==4: #if there is an its file to
-            timestamps_its=get_time_adjustements(record[3],its_types) #dictionnary for all its types demanded
+            timestamps_its=get_time_adjustements(record[3],its_types,output_dir+'/'+record[0]) #dictionnary for all its types demanded
 
     
             list_removed=[]
@@ -120,13 +123,13 @@ def create_all_type_eaf_multiple(folder,output_dir,onset_function,eaf_type,t,con
             etf_path, pfsx_path = choose_template(template)
 
             print("making the "+eaf_type+" eaf file and csv")
-            create_eaf(etf_path,record[0]+eaf_type+'_'+'its_'+template, output_dir, timestamps_wav,eaf_type,contx_onset,contx_offset,template,timestamps_its)
-            shutil.copy(pfsx_path, os.path.join(output_dir, "{}.pfsx".format(record[0]+eaf_type+'_'+'its_'+template)))
-            create_output_csv(record[0], timestamps_wav, os.path.join(output_dir,"{}.csv".format(record[0]+'_'+eaf_type+'_its_'+template)),contx_onset,contx_offset)
+            create_eaf(etf_path,record[0]+eaf_type+'_'+'its_'+template, output_dir+'/'+record[0], timestamps_wav,eaf_type,contx_onset,contx_offset,template,timestamps_its)
+            shutil.copy(pfsx_path, os.path.join(output_dir+'/'+record[0], "{}.pfsx".format(record[0]+eaf_type+'_'+'its_'+template)))
+            create_output_csv(record[0], timestamps_wav, os.path.join(output_dir+'/'+record[0],"{}.csv".format(record[0]+'_'+eaf_type+'_its_'+template)),contx_onset,contx_offset)
             for k,v in timestamps_its.items():
                 print("making the "+k+" csv file")
                 #create csv for all its types
-                create_output_csv_its(record[0], v, os.path.join(output_dir,"{}.csv".format(record[0]+'_'+eaf_type+'_'+template+'_its_'+k)),contx_onset,contx_offset)
+                create_output_csv_its(record[0], v, os.path.join(output_dir+'/'+record[0],"{}.csv".format(record[0]+'_'+eaf_type+'_'+template+'_its_'+k)),contx_onset,contx_offset)
         else:
             print("Could not find the .its file for this record. Only random/periodic option to be generated.")
             create_all_type_eaf(folder,output_dir,onset_function,eaf_type,t,contx_onset,contx_offset,template,*args)
