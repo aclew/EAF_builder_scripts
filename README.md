@@ -14,6 +14,21 @@ This repo contains the script for creating periodicly or randomly selected ELAN 
 * numpy
 * rpy2
 
+## To use this code
+
+Don't forget to install the required packages mentioned above!
+
+$ git clone https://github.com/aclew/EAF_builder_scripts.git
+$ git checkout -b second-version
+
+## A note on the templates
+
+You currently have three choices:
+
+1) ACLEW-basic-template_all-tiers -- as the name indicates
+2) ACLEW-LAAC-native -- a variant on ACLEW, the only change being that VCM is also coded in non-CHI tiers
+3) ACLEW-LAAC-non-native -- for use when your annotators don't speak the language in the files; it does not include the xds, lex, mwu tiers
+
 ## For launching the code:
 
 	python3 main1.py 'path_to_your_wav_folder' 'path_to_new_eaf_store_file' 'periodic or random(choose one)' --t 'int' --n/--skip 'int' (skip if periodic, n if random) --c_on 'int' --c_off 'int' --temp 'basic or native or non-native' --its 'y/n' (if yes) --n_its  'int' --its_types 'list' --overlap 'y/n'
