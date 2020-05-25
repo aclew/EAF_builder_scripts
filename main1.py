@@ -50,6 +50,9 @@ def main():
         print("Sorry this type of eaf does not exist please type 'random' or 'periodic'.")
 
 def write_parameters(params,folder,eaf_type,its):
+    """
+    Create a csv file which save pipeline parameters
+    """
     print("Writing pipeline parameters to csv.")
     csv_file="{}.csv".format(folder+'/'+'pipeline_parameters')
     
