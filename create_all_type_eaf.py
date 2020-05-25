@@ -27,8 +27,8 @@ def create_all_type_eaf(folder,output_dir,onset_function,eaf_type,t,contx_onset,
         output_dir:a folder which contains eafs for each wav file of input filder
     """
 
-
-
+ 
+    os.makedirs(output_dir, exist_ok=True)
     record_list = []
  
     for dirpath, dirnames, wavfiles in os.walk(folder): #getting into folder for proccessing files
