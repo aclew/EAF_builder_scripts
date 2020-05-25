@@ -11,7 +11,7 @@ from utils import choose_onsets_periodic, choose_onsets_random,create_eaf,create
 
 
 """
-Creates a generic eaf, proper both to random and periodic method
+Creates a generic eaf, proper both to random and periodic method with or without its file information
 """
 def create_all_type_eaf(folder,output_dir,onset_function,eaf_type,t,contx_onset,contx_offset,template,*args):
     """
@@ -22,6 +22,7 @@ def create_all_type_eaf(folder,output_dir,onset_function,eaf_type,t,contx_onset,
         eaf_type: random / periodic
         contx_onset:Context onset and code onset difference
         contx_offset: Context offset and code offset difference
+        template: native or non-native
         *args: for being able to call different arguments for periodic and random methods
     Returns: 
         output_dir:a folder which contains eafs for each wav file of input filder
@@ -69,7 +70,7 @@ def create_all_type_eaf_multiple(folder,output_dir,onset_function,eaf_type,t,con
         overlap: if overllaping time segments are permitted between periodic/random methods and its information
         *args: for being able to call different arguments for periodic and random methods
     Returns: 
-        output_dir:a folder which contains eafs for each wav file of input filder
+        output_dir:a folder which contains eafs files for each wav file of input folder
     """
 
 
