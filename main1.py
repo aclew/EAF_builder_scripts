@@ -10,7 +10,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('wav_folder', default=None, help='Folder which contains wav files for Eaf extraction')
     parser.add_argument('output_folder', default=None, help='Folder which will contains newly created eaf templates for wav files')
-    parser.add_argument('--eaf_type', default=None, help='Random or Periodic or None')
+    parser.add_argument('eaf_type', default=None, help='Random or Periodic or None')
     parser.add_argument('--t',help='Length of extracted chunks for periodic and random')
     parser.add_argument('--n',help='number of chunks selected for random methods')
     parser.add_argument('--skip',help='Interstimulis interval for periodic method')
