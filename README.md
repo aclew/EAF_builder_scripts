@@ -18,8 +18,10 @@ This repo contains the script for creating periodicly or randomly selected ELAN 
 
 Don't forget to install the required packages mentioned above!
 
+```
 $ git clone https://github.com/aclew/EAF_builder_scripts.git
 $ git checkout -b second-version
+```
 
 ## A note on the templates
 
